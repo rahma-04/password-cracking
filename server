@@ -1,0 +1,49 @@
+#Server
+import hashlib
+from urllib.request import urlopen
+from xmlrpc.server import SimpleXMLRPCServer
+from xmlrpc.server import SimpleXMLRPCRequestHandler
+
+class RequestHandler(SimpleXMLRPCRequestHandler):
+    rpc_paths = ('/RPC2',)
+
+with SimpleXMLRPCServer(("127.0.0.1", 8000), 
+            requestHandler=RequestHandler, allow_none = True) as server:
+            server.register_introspection_functions()
+            print("Server Berhasil Dibuat!")
+           
+            list_tampung = []
+            list_ketemu = []
+
+            def getWordWorker(word):
+                list_tampung.append(word)
+                return list_tampung
+             
+            def hash(wordlistpassword):
+                result = hashlib.sha1(wordlistpassword.encode())
+                return result.hexdigest()
+             
+            def bruteforce():
+                bool_ketemu = False
+                for guess_password in list_tampung:                  
+                    if hash(guess_password) == actual_password_hash:
+                        bool_ketemu = True
+                        list_ketemu.append(guess_password)
+                return bool_ketemu
+            
+            def gotcha():
+                if list_ketemu[0] == None:
+                    None
+                else:
+                    return list_ketemu[0]
+               
+            actual_password = 'oxygen'
+            actual_password_hash = hash(actual_password)
+            
+            print(f"Pecahkan hash berikut: {actual_password_hash}")
+ 
+            server.register_function(getWordWorker, 'getWordWorker')
+            server.register_function(gotcha, 'gotcha')
+            server.register_function(bruteforce, 'bruteforce')
+            
+            server.serve_forever()
